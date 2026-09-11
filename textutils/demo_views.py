@@ -5,59 +5,69 @@ from django.shortcuts import render
 
 
 def index(request):
-    # var = {"name":"Dhiraj", "age":22} # Includes variables in Templates
     return render(request, "index.html")
 
 
 def analyze(request):
-    # Get the Text
-    text = (request.POST.get('Text', 'default'))
+    # Match lowercase 'text' from the form
+    text = request.POST.get('text', '')
 
-    # Check the Checkbox value
-    rempunc = (request.POST.get('rempunc', 'off'))
-    capatalize = (request.POST.get("capatalize", "off"))
-    rmnl = (request.POST.get("rmnl", "off"))
-    rmsp = (request.POST.get("rmsp", "off"))
-    count = (request.POST.get("count", "off"))
+    # Check the Checkbox values
+    rempunc = request.POST.get('rempunc', 'off')
+    capatalize = request.POST.get("capatalize", "off")
+    rmnl = request.POST.get("rmnl", "off")
+    rmsp = request.POST.get("rmsp", "off")
+    count = request.POST.get("count", "off")
 
-    # Check which checkbox is "on"
+    operations = []
+
+    # 1. Remove Punctuations
     if rempunc == "on":
         analyzed = ""
-        punct = """.?”“‘,-—!'":;(){[]}…/~@#$%^&\*_<>"""
-        for i in text:
-            if i not in punct:
-                analyzed += i
-        par = {"analyzed_text": analyzed, "ana": "Removed Punctuations" }
+        punct = """.?”“‘,-—!'":;(){[]}…/~@#$%^&*_<>"""
+        for char in text:
+            if char not in punct:
+                analyzed += char
+        operations.append("Removed Punctuations")
         text = analyzed
 
+    # 2. Capitalize
     if capatalize == "on":
-        upper = (text.upper())
-        par = {"analyzed_text": upper, "ana": "Changed to Upper Case" }
-        text = upper
+        text = text.upper()
+        operations.append("Changed to Upper Case")
 
+    # 3. Remove New Lines
     if rmnl == "on":
-        new =""
-        for i in text:
-            if i != "\n" and i != "\r":
-                new += i
-        par = {"analyzed_text": new, "ana": "Removed NewLines" }
+        new = ""
+        for char in text:
+            if char != "\n" and char != "\r":
+                new += char
+        operations.append("Removed NewLines")
         text = new
-    
-    if rmsp == "on":
-        new =""
-        for index,i in enumerate(text):
-            if not(text[index] == " " and text[index+1] == " "):
-                new += i 
-        par = {"analyzed_text": new, "ana": "Removed Extra Spaces" }
-        text = new
-    
-    if count == "on":
-        char = 0
-        for i in text:
-            char += 1
-        par = {"analyzed_text": char, "ana": "Total Characters" }
-        
-    return render(request, "analyze.html",  par)
-    
-    
 
+    # 4. Remove Extra Spaces
+    if rmsp == "on":
+        new = ""
+        for index, char in enumerate(text):
+            if index + 1 < len(text):
+                if not (text[index] == " " and text[index + 1] == " "):
+                    new += char
+            else:
+                new += char
+        operations.append("Removed Extra Spaces")
+        text = new
+
+    # 5. Count Characters (overrides output if selected)
+    if count == "on":
+        char_count = len(text)
+        par = {
+            "analyzed_text": f"Total characters: {char_count}",
+            "ana": "Counted Characters"
+        }
+    else:
+        par = {
+            "analyzed_text": text,
+            "ana": ", ".join(operations) if operations else "No Operation Selected"
+        }
+
+    return render(request, "analyze.html", par)

@@ -1,72 +1,244 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-    <title>Document</title>
-</head>
-<body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container-fluid">
-          <a class="navbar-brand" href="#"><strong>Textutils.com</strong></a>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
+{% extends "base.html" %}
+
+{% block title %}Home — TextUtils{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="text-center mb-4">
+      <h1 class="display-5 fw-bold">Text Analyzer</h1>
+      <p class="lead text-muted">
+        Paste your text below and pick what you want to do with it.
+      </p>
+    </div>
+
+    <!-- Intro alert (dismissible, only shown once per session via JS) -->
+    <div
+      id="welcomeAlert"
+      class="alert alert-success alert-dismissible fade show"
+      role="alert"
+    >
+      <strong>Welcome to TextUtils!</strong> Analyze, clean, and transform your text easily.
+      <button
+        type="button"
+        class="btn-close"
+        data-bs-dismiss="alert"
+        aria-label="Close"
+      ></button>
+    </div>
+
+    <!-- Main Form -->
+    <form action="{% url 'analyze' %}" method="post" class="card shadow-sm p-4">
+      {% csrf_token %}
+
+      <!-- Demo Tests Dropdown -->
+      <div class="mb-3 d-flex justify-content-end">
+        <div class="dropdown">
+          <button
+            class="btn btn-outline-secondary btn-sm dropdown-toggle"
+            type="button"
+            id="testsDropdown"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            🧪 Tests
           </button>
-          <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-              <li class="nav-item">    
-                <a class="nav-link active" aria-current="page" href="/">Home</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="#">About</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="#">Contact</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="#">My Portfolio</a>
-              </li>
-              </ul>
-            <form class="d-flex" role="search">
-              <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-              <button class="btn btn-outline-success" type="submit">Search</button>
-            </form>
-          </div>
+          <ul
+            class="dropdown-menu dropdown-menu-end shadow"
+            aria-labelledby="testsDropdown"
+            style="min-width: 340px; max-width: 420px; max-height: 400px; overflow-y: auto;"
+          >
+            <li><h6 class="dropdown-header">Load a sample text</h6></li>
+
+            <li>
+              <button
+                type="button"
+                class="dropdown-item demo-item"
+                data-text="Hey!!! This,,, is a MESSY paragraph... Can YOU clean it?? It has -- LOTS -- of punctuation!!! (And extra spaces.) Try me!!!"
+              >
+                <div class="fw-semibold">🧹 Messy Paragraph</div>
+                <div class="small text-muted text-truncate">
+                  Hey!!! This,,, is a MESSY paragraph... Can YOU clean it??
+                </div>
+              </button>
+            </li>
+
+            <li>
+              <button
+                type="button"
+                class="dropdown-item demo-item"
+                data-text="Item 1: Buy milk&#10;Item 2: Walk the dog&#10;Item 3: Finish homework&#10;&#10;Task list above has new lines everywhere.&#10;Try removing them!"
+              >
+                <div class="fw-semibold">📋 Multi-line List</div>
+                <div class="small text-muted text-truncate">
+                  Item 1: Buy milk / Item 2: Walk the dog...
+                </div>
+              </button>
+            </li>
+
+            <li>
+              <button
+                type="button"
+                class="dropdown-item demo-item"
+                data-text="def greet(name):&#10;    print(f'Hello, {name}!!!')&#10;&#10;greet('World')  # This is a comment, with punctuation! ,,,"
+              >
+                <div class="fw-semibold">💻 Code Snippet</div>
+                <div class="small text-muted text-truncate">
+                  def greet(name): print(f'Hello, {name}!!!')...
+                </div>
+              </button>
+            </li>
+
+            <li><hr class="dropdown-divider" /></li>
+
+            <li>
+              <button type="button" class="dropdown-item" id="clearDemo">
+                <span class="text-danger">✕ Clear textarea</span>
+              </button>
+            </li>
+          </ul>
         </div>
-      </nav>
-      <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <strong>Welcome to Textutils!</strong> You can <i>Analyze</i> your text here. 
-        <button type="button" class="btn-close" data-bs-dismiss ="alert" aria-label="Close"></button>
       </div>
-      <form action="/analyze" method="post" class="container" style="width: 889px; height: 238px;"> {% csrf_token %}
-        <div class="mb-3">
-          <label for="exampleInputEmail1" class="form-label">Enter/Paste your Text</label>
-          <textarea  class="form-control" name="Text" id="exampleInputEmail1" aria-describedby="emailHelp" rows="9"></textarea>
-          <div id="emailHelp" class="form-text">We'll never share your text with anyone else.</div>
+
+      <!-- Text Input -->
+      <div class="mb-4">
+        <label for="textInput" class="form-label fw-semibold">
+          Enter or paste your text
+        </label>
+        <!-- Note: change name="text" if your views.py uses lowercase -->
+        <textarea
+          class="form-control"
+          name="text"
+          id="textInput"
+          rows="9"
+          placeholder="Type or paste your text here..."
+          required
+        ></textarea>
+        <div class="form-text">
+          Your text is never stored or shared. Processing happens on the server
+          only during analysis.
         </div>
-        <div class="form-check form-switch">
-            <input class="form-check-input" type="checkbox" name="rempunc"  >
-            <label class="form-check-label" for="flexSwitchCheckChecked">Remove Punctuation</label>
+      </div>
+
+      <!-- Operations Fieldset -->
+      <fieldset class="mb-4">
+        <legend class="fs-6 fw-semibold text-muted mb-3">
+          Choose operations (you can combine most of them)
+        </legend>
+
+        <div class="form-check form-switch mb-2">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            role="switch"
+            name="rempunc"
+            id="optRempunc"
+          />
+          <label class="form-check-label" for="optRempunc">
+            Remove Punctuation
+          </label>
         </div>
-        <div class="form-check form-switch">
-            <input class="form-check-input" type="checkbox" name="capatalize"role="switch" id="flexSwitchCheckChecked" >
-            <label class="form-check-label" for="flexSwitchCheckChecked">UpperCase</label>
+
+        <div class="form-check form-switch mb-2">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            role="switch"
+            name="capatalize"
+            id="optCapatalize"
+          />
+          <label class="form-check-label" for="optCapatalize">
+            Convert to UPPERCASE
+          </label>
         </div>
-        <div class="form-check form-switch">
-            <input class="form-check-input" type="checkbox" name="rmnl" role="switch" id="flexSwitchCheckChecked" >
-            <label class="form-check-label" for="flexSwitchCheckChecked">Remove New Line</label>
+
+        <div class="form-check form-switch mb-2">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            role="switch"
+            name="rmnl"
+            id="optRmnl"
+          />
+          <label class="form-check-label" for="optRmnl">
+            Remove New Lines
+          </label>
         </div>
-        <div class="form-check form-switch">
-            <input class="form-check-input" type="checkbox" name="rmsp" role="switch" id="flexSwitchCheckChecked" >
-            <label class="form-check-label" for="flexSwitchCheckChecked">Extra Space Remover</label>
+
+        <div class="form-check form-switch mb-2">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            role="switch"
+            name="rmsp"
+            id="optRmsp"
+          />
+          <label class="form-check-label" for="optRmsp">
+            Remove Extra Spaces
+          </label>
         </div>
-        <div class="form-check form-switch">
-            <input class="form-check-input" type="checkbox" name="count" role="switch" id="flexSwitchCheckChecked" >
-            <label class="form-check-label" for="flexSwitchCheckChecked">Count Character (Cannot used with combinations)</label>
+
+        <div class="form-check form-switch mb-2">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            role="switch"
+            name="count"
+            id="optCount"
+          />
+          <label class="form-check-label" for="optCount">
+            Count Characters
+            <small class="text-muted">(overrides other operations)</small>
+          </label>
         </div>
-        <button type="submit" class="btn btn-primary">Analyze Text</button>
-      </form>
-      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
-</body>
-</html>
+      </fieldset>
+
+      <!-- Submit -->
+      <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+        <button type="reset" class="btn btn-outline-secondary">Clear</button>
+        <button type="submit" class="btn btn-primary px-4">Analyze Text</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Hide welcome alert after first view
+  (function () {
+    const alertEl = document.getElementById('welcomeAlert');
+    if (!alertEl) return;
+
+    if (sessionStorage.getItem('textutils_welcomed') === '1') {
+      alertEl.remove();
+    } else {
+      sessionStorage.setItem('textutils_welcomed', '1');
+    }
+  })();
+
+  // Demo Tests Dropdown
+  (function () {
+    const textarea = document.getElementById('textInput');
+    const clearBtn = document.getElementById('clearDemo');
+    const demoItems = document.querySelectorAll('.demo-item');
+
+    if (!textarea) return;
+
+    demoItems.forEach(function (item) {
+      item.addEventListener('click', function () {
+        textarea.value = item.dataset.text || '';
+        textarea.focus();
+        textarea.scrollTop = 0;
+      });
+    });
+
+    if (clearBtn) {
+      clearBtn.addEventListener('click', function () {
+        textarea.value = '';
+        textarea.focus();
+      });
+    }
+  })();
+</script>
+{% endblock %}
