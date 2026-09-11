@@ -1,7 +1,5 @@
-{% extends "base.html" %}
-
-{% block title %}Home — TextUtils{% endblock %}
-
+{% extends "base.html" %} 
+{% block title %}Home — TextUtils{% endblock %} 
 {% block content %}
 <div class="row justify-content-center">
   <div class="col-lg-8">
@@ -18,7 +16,8 @@
       class="alert alert-success alert-dismissible fade show"
       role="alert"
     >
-      <strong>Welcome to TextUtils!</strong> Analyze, clean, and transform your text easily.
+      <strong>Welcome to TextUtils!</strong> Analyze, clean, and transform your
+      text easily.
       <button
         type="button"
         class="btn-close"
@@ -46,7 +45,12 @@
           <ul
             class="dropdown-menu dropdown-menu-end shadow"
             aria-labelledby="testsDropdown"
-            style="min-width: 340px; max-width: 420px; max-height: 400px; overflow-y: auto;"
+            style="
+              min-width: 340px;
+              max-width: 420px;
+              max-height: 400px;
+              overflow-y: auto;
+            "
           >
             <li><h6 class="dropdown-header">Load a sample text</h6></li>
 
@@ -144,10 +148,10 @@
             class="form-check-input"
             type="checkbox"
             role="switch"
-            name="capatalize"
-            id="optCapatalize"
+            name="capitalize"
+            id="optCapitalize"
           />
-          <label class="form-check-label" for="optCapatalize">
+          <label class="form-check-label" for="optCapitalize">
             Convert to UPPERCASE
           </label>
         </div>
@@ -201,41 +205,39 @@
     </form>
   </div>
 </div>
-{% endblock %}
-
-{% block extra_js %}
+{% endblock %} {% block extra_js %}
 <script>
   // Hide welcome alert after first view
   (function () {
-    const alertEl = document.getElementById('welcomeAlert');
+    const alertEl = document.getElementById("welcomeAlert");
     if (!alertEl) return;
 
-    if (sessionStorage.getItem('textutils_welcomed') === '1') {
+    if (sessionStorage.getItem("textutils_welcomed") === "1") {
       alertEl.remove();
     } else {
-      sessionStorage.setItem('textutils_welcomed', '1');
+      sessionStorage.setItem("textutils_welcomed", "1");
     }
   })();
 
   // Demo Tests Dropdown
   (function () {
-    const textarea = document.getElementById('textInput');
-    const clearBtn = document.getElementById('clearDemo');
-    const demoItems = document.querySelectorAll('.demo-item');
+    const textarea = document.getElementById("textInput");
+    const clearBtn = document.getElementById("clearDemo");
+    const demoItems = document.querySelectorAll(".demo-item");
 
     if (!textarea) return;
 
     demoItems.forEach(function (item) {
-      item.addEventListener('click', function () {
-        textarea.value = item.dataset.text || '';
+      item.addEventListener("click", function () {
+        textarea.value = item.dataset.text || "";
         textarea.focus();
         textarea.scrollTop = 0;
       });
     });
 
     if (clearBtn) {
-      clearBtn.addEventListener('click', function () {
-        textarea.value = '';
+      clearBtn.addEventListener("click", function () {
+        textarea.value = "";
         textarea.focus();
       });
     }
