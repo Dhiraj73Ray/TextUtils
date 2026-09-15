@@ -1,6 +1,7 @@
 ```markdown
 > ⚠️ This repository is archived.
 > It is no longer actively maintained. The code is provided as-is for reference and learning purposes.
+> Still it is live on render, it may takes 30-40 sec to start the live working, **ls be patience**
 ```
 # TextUtils - A Modern Text Analyzer & Utility <sub>([🌐 Live Demo](https://textutils-5dz1.onrender.com))</sub>
 
