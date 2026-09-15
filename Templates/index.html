@@ -161,6 +161,127 @@
             class="form-check-input"
             type="checkbox"
             role="switch"
+            name="lowercase"
+            id="optLowercase"
+          />
+          <label class="form-check-label" for="optLowercase">
+            Convert to lowercase
+          </label>
+        </div>
+
+        <div class="form-check form-switch mb-2">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            role="switch"
+            name="title_case"
+            id="optTitleCase"
+          />
+          <label class="form-check-label" for="optTitleCase">
+            Convert to Title Case
+          </label>
+        </div>
+
+        <div class="form-check form-switch mb-2">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            role="switch"
+            name="sentence_case"
+            id="optSentenceCase"
+          />
+          <label class="form-check-label" for="optSentenceCase">
+            Convert to Sentence Case
+          </label>
+        </div>
+
+        <div class="form-check form-switch mb-2">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            role="switch"
+            name="remove_numbers"
+            id="optRemoveNumbers"
+          />
+          <label class="form-check-label" for="optRemoveNumbers">
+            Remove Numbers
+          </label>
+        </div>
+
+        <div class="form-check form-switch mb-2">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            role="switch"
+            name="reverse_text"
+            id="optReverseText"
+          />
+          <label class="form-check-label" for="optReverseText">
+            Reverse Entire Text
+          </label>
+        </div>
+
+        <div class="form-check form-switch mb-2">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            role="switch"
+            name="reverse_lines"
+            id="optReverseLines"
+          />
+          <label class="form-check-label" for="optReverseLines">
+            Reverse Line Order
+          </label>
+        </div>
+
+        <div class="form-check form-switch mb-2">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            role="switch"
+            name="remove_duplicates"
+            id="optRemoveDuplicates"
+          />
+          <label class="form-check-label" for="optRemoveDuplicates">
+            Remove Duplicate Lines
+          </label>
+        </div>
+
+        <!-- Sort Lines Toggle Switch -->
+        <div class="form-check form-switch mb-2">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            role="switch"
+            name="sort_lines_switch"
+            id="optSortLines"
+          />
+          <label class="form-check-label" for="optSortLines">
+            Sort Lines
+          </label>
+        </div>
+
+        <!-- Sort Lines Dropdown (Hidden by default) -->
+        <div id="sortOptionsContainer" class="mb-3 ms-4 d-none">
+          <label for="sort_lines" class="form-label small text-muted mb-1"
+            >Sort by:</label
+          >
+          <select
+            class="form-select form-select-sm w-auto"
+            name="sort_lines"
+            id="sort_lines"
+          >
+            <option value="az" selected>Alphabetical (A-Z)</option>
+            <option value="za">Reverse Alphabetical (Z-A)</option>
+            <option value="length">Length (Shortest to Longest)</option>
+          </select>
+        </div>
+
+        <div class="form-check form-switch mb-2">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            role="switch"
             name="rmnl"
             id="optRmnl"
           />
@@ -241,6 +362,21 @@
         textarea.focus();
       });
     }
+
+    (function () {
+      const sortSwitch = document.getElementById("optSortLines");
+      const sortContainer = document.getElementById("sortOptionsContainer");
+
+      if (!sortSwitch || !sortContainer) return;
+
+      sortSwitch.addEventListener("change", function () {
+        if (this.checked) {
+          sortContainer.classList.remove("d-none");
+        } else {
+          sortContainer.classList.add("d-none");
+        }
+      });
+    })();
   })();
 </script>
 {% endblock %}
