@@ -55,6 +55,7 @@
                 <div class="form-check form-switch mb-2"><input class="form-check-input op-check" type="checkbox" id="opUpper"><label class="form-check-label" for="opUpper">UPPERCASE</label></div>
                 <div class="form-check form-switch mb-2"><input class="form-check-input op-check" type="checkbox" id="opLower"><label class="form-check-label" for="opLower">lowercase</label></div>
                 <div class="form-check form-switch mb-2"><input class="form-check-input op-check" type="checkbox" id="opTitle"><label class="form-check-label" for="opTitle">Title Case</label></div>
+                <div class="form-check form-switch mb-2"><input class="form-check-input op-check" type="checkbox" id="opSentence"><label class="form-check-label" for="opSentence">Sentence Case</label></div>
                 <div class="form-check form-switch mb-2"><input class="form-check-input op-check" type="checkbox" id="opPunc"><label class="form-check-label" for="opPunc">Remove Punctuation</label></div>
                 <div class="form-check form-switch mb-2"><input class="form-check-input op-check" type="checkbox" id="opNum"><label class="form-check-label" for="opNum">Remove Numbers</label></div>
             </div>
@@ -64,6 +65,7 @@
                 <div class="form-check form-switch mb-2"><input class="form-check-input op-check" type="checkbox" id="opDup"><label class="form-check-label" for="opDup">Remove Duplicates</label></div>
                 <div class="form-check form-switch mb-2"><input class="form-check-input op-check" type="checkbox" id="opSpaces"><label class="form-check-label" for="opSpaces">Remove Extra Spaces</label></div>
                 <div class="form-check form-switch mb-2"><input class="form-check-input op-check" type="checkbox" id="opB64"><label class="form-check-label" for="opB64">Base64 Encode</label></div>
+                <div class="form-check form-switch mb-2"><input class="form-check-input op-check" type="checkbox" id="opB64Decode"><label class="form-check-label" for="opB64Decode">Base64 Decode</label></div>
             </div>
             <div class="col-md-4">
                 <div class="mb-2">
@@ -115,6 +117,7 @@
             if (document.getElementById('opUpper').checked) text = text.toUpperCase();
             if (document.getElementById('opLower').checked) text = text.toLowerCase();
             if (document.getElementById('opTitle').checked) text = text.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+            if (document.getElementById('opSentence').checked) {text = text.toLowerCase().replace(/(^\s*\w|[.!?]\s*\w)/g, function(c) { return c.toUpperCase(); });}
 
             // 3. Remove Stuff
             if (document.getElementById('opPunc').checked) text = text.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?"'”“‘’—]/g, "");
@@ -139,6 +142,12 @@
             // 6. Base64
             if (document.getElementById('opB64').checked) {
                 try { text = btoa(text); } catch(e) { text = "Error: Cannot encode."; }
+            }
+            if (document.getElementById('opB64').checked) {
+                try { text = btoa(unescape(encodeURIComponent(text))); } catch(e) { text = "Error: Cannot encode."; }
+            }
+            if (document.getElementById('opB64Decode').checked) {
+                try { text = decodeURIComponent(escape(atob(text))); } catch(e) { text = "Error: Cannot decode."; }
             }
 
             outputEl.value = text;
