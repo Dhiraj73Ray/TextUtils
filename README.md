@@ -2,7 +2,7 @@
 > ⚠️ This repository is archived.
 > It is no longer actively maintained. The code is provided as-is for reference and learning purposes.
 ```
-# TextUtils - A Modern Text Analyzer & Utility
+# TextUtils - A Modern Text Analyzer & Utility <sub>([🌐 Live Demo](https://textutils-5dz1.onrender.com))</sub>
 
 `A lightning-fast, client-side text utility tool built with Django & vanilla JavaScript. No page reloads, just instant results.`
 
