@@ -6,7 +6,7 @@
 
 `A lightning-fast, client-side text utility tool built with Django & vanilla JavaScript. No page reloads, just instant results.`
 
-![TextUtils Banner](https://via.placeholder.com/1200x400?text=TextUtils+App) <!-- Replace with a real screenshot! -->
+![TextUtils Banner](https://github.com/Dhiraj73Ray/TextUtils/blob/main/SS/Screenshot.png?raw=true) <!-- Replace with a real screenshot! -->
 
 ## 🚀 Features
 
