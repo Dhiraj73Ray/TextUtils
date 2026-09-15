@@ -277,6 +277,52 @@
           </select>
         </div>
 
+                <!-- Find & Replace -->
+        <div class="form-check form-switch mb-2">
+          <input class="form-check-input" type="checkbox" role="switch" name="find_replace_switch" id="optFindReplace" />
+          <label class="form-check-label" for="optFindReplace">Find & Replace</label>
+        </div>
+        <div id="findReplaceContainer" class="mb-3 ms-4 d-none">
+          <input type="text" class="form-control form-control-sm mb-2" name="find_text" placeholder="Find...">
+          <input type="text" class="form-control form-control-sm" name="replace_text" placeholder="Replace with...">
+        </div>
+
+        <!-- Extract Emails/URLs -->
+        <div class="form-check form-switch mb-2">
+          <input class="form-check-input" type="checkbox" role="switch" name="extract_emails" id="optExtractEmails" />
+          <label class="form-check-label" for="optExtractEmails">Extract Emails</label>
+        </div>
+        <div class="form-check form-switch mb-2">
+          <input class="form-check-input" type="checkbox" role="switch" name="extract_urls" id="optExtractUrls" />
+          <label class="form-check-label" for="optExtractUrls">Extract URLs</label>
+        </div>
+
+        <!-- Base64 & URL Encode/Decode -->
+        <div class="form-check form-switch mb-2">
+          <input class="form-check-input" type="checkbox" role="switch" name="base64_encode" id="optB64Encode" />
+          <label class="form-check-label" for="optB64Encode">Base64 Encode</label>
+        </div>
+        <div class="form-check form-switch mb-2">
+          <input class="form-check-input" type="checkbox" role="switch" name="base64_decode" id="optB64Decode" />
+          <label class="form-check-label" for="optB64Decode">Base64 Decode</label>
+        </div>
+        <div class="form-check form-switch mb-2">
+          <input class="form-check-input" type="checkbox" role="switch" name="url_encode" id="optUrlEncode" />
+          <label class="form-check-label" for="optUrlEncode">URL Encode</label>
+        </div>
+        <div class="form-check form-switch mb-2">
+          <input class="form-check-input" type="checkbox" role="switch" name="url_decode" id="optUrlDecode" />
+          <label class="form-check-label" for="optUrlDecode">URL Decode</label>
+        </div>
+        <div class="form-check form-switch mb-2">
+          <input class="form-check-input" type="checkbox" role="switch" name="json_format" id="optJsonFormat" />
+          <label class="form-check-label" for="optJsonFormat">Format JSON</label>
+        </div>
+
+
+
+
+
         <div class="form-check form-switch mb-2">
           <input
             class="form-check-input"
@@ -377,6 +423,15 @@
         }
       });
     })();
+      // Toggle Find & Replace Inputs
+  (function () {
+    const frSwitch = document.getElementById("optFindReplace");
+    const frContainer = document.getElementById("findReplaceContainer");
+    if (!frSwitch || !frContainer) return;
+    frSwitch.addEventListener("change", function () {
+      frContainer.classList.toggle("d-none", !this.checked);
+    });
+  })();
   })();
 </script>
 {% endblock %}

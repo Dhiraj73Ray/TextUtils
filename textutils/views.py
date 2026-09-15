@@ -7,6 +7,9 @@ Handles:
 """
 
 from django.shortcuts import render
+import base64
+import json
+from urllib.parse import quote, unquote
 
 
 # Characters stripped by the "Remove Punctuation" operation
@@ -44,6 +47,16 @@ def analyze(request):
     reverse_lines = request.POST.get("reverse_lines", "off")
     remove_duplicates = request.POST.get("remove_duplicates", "off")
     sort_lines = request.POST.get("sort_lines", "off")
+    find_replace_switch = request.POST.get("find_replace_switch", "off")
+    find_text = request.POST.get("find_text", "")
+    replace_text = request.POST.get("replace_text", "")
+    extract_emails = request.POST.get("extract_emails", "off")
+    extract_urls = request.POST.get("extract_urls", "off")
+    base64_encode = request.POST.get("base64_encode", "off")
+    base64_decode = request.POST.get("base64_decode", "off")
+    url_encode = request.POST.get("url_encode", "off")
+    url_decode = request.POST.get("url_decode", "off")
+    json_format = request.POST.get("json_format", "off")
     rmnl = request.POST.get("rmnl", "off")
     rmsp = request.POST.get("rmsp", "off")
     count = request.POST.get("count", "off")
@@ -139,6 +152,59 @@ def analyze(request):
             operations.append("Sorted Lines by Length")
             
         text = "\n".join(lines)
+
+    # --- 2.9. Find & Replace ---
+    if find_replace_switch == "on" and find_text:
+        text = text.replace(find_text, replace_text)
+        operations.append("Find & Replace")
+
+    # --- 2.10. Extract Emails ---
+    if extract_emails == "on":
+        import re
+        emails = re.findall(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}', text)
+        text = "\n".join(emails)
+        operations.append("Extracted Emails")
+
+    # --- 2.11. Extract URLs ---
+    if extract_urls == "on":
+        import re
+        urls = re.findall(r'https?://[^\s]+', text)
+        text = "\n".join(urls)
+        operations.append("Extracted URLs")
+
+    # --- 2.12. Base64 Encode ---
+    if base64_encode == "on":
+        text = base64.b64encode(text.encode()).decode()
+        operations.append("Base64 Encoded")
+
+    # --- 2.13. Base64 Decode ---
+    if base64_decode == "on":
+        try:
+            text = base64.b64decode(text.encode()).decode()
+            operations.append("Base64 Decoded")
+        except Exception:
+            text = "Error: Invalid Base64 string"
+            operations.append("Base64 Decode Failed")
+
+    # --- 2.14. URL Encode ---
+    if url_encode == "on":
+        text = quote(text)
+        operations.append("URL Encoded")
+
+    # --- 2.15. URL Decode ---
+    if url_decode == "on":
+        text = unquote(text)
+        operations.append("URL Decoded")
+
+    # --- 2.16. Format JSON ---
+    if json_format == "on":
+        try:
+            parsed = json.loads(text)
+            text = json.dumps(parsed, indent=4)
+            operations.append("Formatted JSON")
+        except Exception:
+            text = "Error: Invalid JSON"
+            operations.append("JSON Format Failed")
 
     # --- 3. Remove New Lines ---
     if rmnl == "on":
