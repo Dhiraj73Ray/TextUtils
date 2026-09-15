@@ -1,437 +1,194 @@
-{% extends "base.html" %} 
-{% block title %}Home — TextUtils{% endblock %} 
+{% extends "base.html" %}
+{% block title %}Home — TextUtils{% endblock %}
 {% block content %}
 <div class="row justify-content-center">
-  <div class="col-lg-8">
+  <div class="col-lg-10">
     <div class="text-center mb-4">
       <h1 class="display-5 fw-bold">Text Analyzer</h1>
-      <p class="lead text-muted">
-        Paste your text below and pick what you want to do with it.
-      </p>
+      <p class="lead text-muted">Paste your text below and pick what you want to do with it.</p>
     </div>
 
-    <!-- Intro alert (dismissible, only shown once per session via JS) -->
-    <div
-      id="welcomeAlert"
-      class="alert alert-success alert-dismissible fade show"
-      role="alert"
-    >
-      <strong>Welcome to TextUtils!</strong> Analyze, clean, and transform your
-      text easily.
-      <button
-        type="button"
-        class="btn-close"
-        data-bs-dismiss="alert"
-        aria-label="Close"
-      ></button>
+    <!-- File Upload & Download -->
+    <div class="d-flex justify-content-end mb-3 gap-2">
+        <input type="file" id="fileInput" accept=".txt" class="d-none">
+        <button class="btn btn-outline-secondary btn-sm" onclick="document.getElementById('fileInput').click()">📁 Upload .txt</button>
+        <button class="btn btn-outline-secondary btn-sm" id="downloadBtn">💾 Download .txt</button>
+        <button class="btn btn-outline-dark btn-sm" id="themeToggle">🌙 Dark Mode</button>
     </div>
 
-    <!-- Main Form -->
-    <form action="{% url 'analyze' %}" method="post" class="card shadow-sm p-4">
-      {% csrf_token %}
-
-      <!-- Demo Tests Dropdown -->
-      <div class="mb-3 d-flex justify-content-end">
-        <div class="dropdown">
-          <button
-            class="btn btn-outline-secondary btn-sm dropdown-toggle"
-            type="button"
-            id="testsDropdown"
-            data-bs-toggle="dropdown"
-            aria-expanded="false"
-          >
-            🧪 Tests
-          </button>
-          <ul
-            class="dropdown-menu dropdown-menu-end shadow"
-            aria-labelledby="testsDropdown"
-            style="
-              min-width: 340px;
-              max-width: 420px;
-              max-height: 400px;
-              overflow-y: auto;
-            "
-          >
-            <li><h6 class="dropdown-header">Load a sample text</h6></li>
-
-            <li>
-              <button
-                type="button"
-                class="dropdown-item demo-item"
-                data-text="Hey!!! This,,, is a MESSY paragraph... Can YOU clean it?? It has -- LOTS -- of punctuation!!! (And extra spaces.) Try me!!!"
-              >
-                <div class="fw-semibold">🧹 Messy Paragraph</div>
-                <div class="small text-muted text-truncate">
-                  Hey!!! This,,, is a MESSY paragraph... Can YOU clean it??
-                </div>
-              </button>
-            </li>
-
-            <li>
-              <button
-                type="button"
-                class="dropdown-item demo-item"
-                data-text="Item 1: Buy milk&#10;Item 2: Walk the dog&#10;Item 3: Finish homework&#10;&#10;Task list above has new lines everywhere.&#10;Try removing them!"
-              >
-                <div class="fw-semibold">📋 Multi-line List</div>
-                <div class="small text-muted text-truncate">
-                  Item 1: Buy milk / Item 2: Walk the dog...
-                </div>
-              </button>
-            </li>
-
-            <li>
-              <button
-                type="button"
-                class="dropdown-item demo-item"
-                data-text="def greet(name):&#10;    print(f'Hello, {name}!!!')&#10;&#10;greet('World')  # This is a comment, with punctuation! ,,,"
-              >
-                <div class="fw-semibold">💻 Code Snippet</div>
-                <div class="small text-muted text-truncate">
-                  def greet(name): print(f'Hello, {name}!!!')...
-                </div>
-              </button>
-            </li>
-
-            <li><hr class="dropdown-divider" /></li>
-
-            <li>
-              <button type="button" class="dropdown-item" id="clearDemo">
-                <span class="text-danger">✕ Clear textarea</span>
-              </button>
-            </li>
-          </ul>
+    <div class="row g-3">
+      <!-- INPUT SIDE -->
+      <div class="col-md-6">
+        <div class="card shadow-sm h-100">
+          <div class="card-header bg-light fw-semibold">Input</div>
+          <div class="card-body p-0">
+            <textarea class="form-control border-0 rounded-0 font-monospace" id="inputText" rows="15" placeholder="Type or paste here..."></textarea>
+          </div>
+          <div class="card-footer bg-light text-muted small">
+            Chars: <strong id="inChar">0</strong> | Words: <strong id="inWord">0</strong> | Lines: <strong id="inLine">0</strong>
+          </div>
         </div>
       </div>
 
-      <!-- Text Input -->
-      <div class="mb-4">
-        <label for="textInput" class="form-label fw-semibold">
-          Enter or paste your text
-        </label>
-        <!-- Note: change name="text" if your views.py uses lowercase -->
-        <textarea
-          class="form-control"
-          name="text"
-          id="textInput"
-          rows="9"
-          placeholder="Type or paste your text here..."
-          required
-        ></textarea>
-        <div class="form-text">
-          Your text is never stored or shared. Processing happens on the server
-          only during analysis.
+      <!-- OUTPUT SIDE -->
+      <div class="col-md-6">
+        <div class="card shadow-sm h-100">
+          <div class="card-header bg-light d-flex justify-content-between align-items-center">
+            <span class="fw-semibold">Output</span>
+            <button class="btn btn-sm btn-outline-primary" id="copyBtn">Copy</button>
+          </div>
+          <div class="card-body p-0">
+            <textarea class="form-control border-0 rounded-0 font-monospace" id="outputText" rows="15" readonly></textarea>
+          </div>
+          <div class="card-footer bg-light text-muted small">
+            Chars: <strong id="outChar">0</strong> | Words: <strong id="outWord">0</strong> | Lines: <strong id="outLine">0</strong>
+          </div>
         </div>
       </div>
+    </div>
 
-      <!-- Operations Fieldset -->
-      <fieldset class="mb-4">
-        <legend class="fs-6 fw-semibold text-muted mb-3">
-          Choose operations (you can combine most of them)
-        </legend>
-
-        <div class="form-check form-switch mb-2">
-          <input
-            class="form-check-input"
-            type="checkbox"
-            role="switch"
-            name="rempunc"
-            id="optRempunc"
-          />
-          <label class="form-check-label" for="optRempunc">
-            Remove Punctuation
-          </label>
+    <!-- Operations -->
+    <div class="card shadow-sm mt-4 p-4">
+        <h5 class="mb-3">Operations</h5>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-check form-switch mb-2"><input class="form-check-input op-check" type="checkbox" id="opUpper"><label class="form-check-label" for="opUpper">UPPERCASE</label></div>
+                <div class="form-check form-switch mb-2"><input class="form-check-input op-check" type="checkbox" id="opLower"><label class="form-check-label" for="opLower">lowercase</label></div>
+                <div class="form-check form-switch mb-2"><input class="form-check-input op-check" type="checkbox" id="opTitle"><label class="form-check-label" for="opTitle">Title Case</label></div>
+                <div class="form-check form-switch mb-2"><input class="form-check-input op-check" type="checkbox" id="opPunc"><label class="form-check-label" for="opPunc">Remove Punctuation</label></div>
+                <div class="form-check form-switch mb-2"><input class="form-check-input op-check" type="checkbox" id="opNum"><label class="form-check-label" for="opNum">Remove Numbers</label></div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-check form-switch mb-2"><input class="form-check-input op-check" type="checkbox" id="opRevText"><label class="form-check-label" for="opRevText">Reverse Text</label></div>
+                <div class="form-check form-switch mb-2"><input class="form-check-input op-check" type="checkbox" id="opRevLines"><label class="form-check-label" for="opRevLines">Reverse Lines</label></div>
+                <div class="form-check form-switch mb-2"><input class="form-check-input op-check" type="checkbox" id="opDup"><label class="form-check-label" for="opDup">Remove Duplicates</label></div>
+                <div class="form-check form-switch mb-2"><input class="form-check-input op-check" type="checkbox" id="opSpaces"><label class="form-check-label" for="opSpaces">Remove Extra Spaces</label></div>
+                <div class="form-check form-switch mb-2"><input class="form-check-input op-check" type="checkbox" id="opB64"><label class="form-check-label" for="opB64">Base64 Encode</label></div>
+            </div>
+            <div class="col-md-4">
+                <div class="mb-2">
+                    <label class="form-label small text-muted mb-1">Sort Lines</label>
+                    <select class="form-select form-select-sm" id="opSort">
+                        <option value="off">Don't Sort</option>
+                        <option value="az">A-Z</option>
+                        <option value="za">Z-A</option>
+                        <option value="length">By Length</option>
+                    </select>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label small text-muted mb-1">Find & Replace</label>
+                    <input type="text" class="form-control form-control-sm mb-1" id="findText" placeholder="Find...">
+                    <input type="text" class="form-control form-control-sm" id="replaceText" placeholder="Replace...">
+                </div>
+            </div>
         </div>
-
-        <div class="form-check form-switch mb-2">
-          <input
-            class="form-check-input"
-            type="checkbox"
-            role="switch"
-            name="capitalize"
-            id="optCapitalize"
-          />
-          <label class="form-check-label" for="optCapitalize">
-            Convert to UPPERCASE
-          </label>
-        </div>
-
-        <div class="form-check form-switch mb-2">
-          <input
-            class="form-check-input"
-            type="checkbox"
-            role="switch"
-            name="lowercase"
-            id="optLowercase"
-          />
-          <label class="form-check-label" for="optLowercase">
-            Convert to lowercase
-          </label>
-        </div>
-
-        <div class="form-check form-switch mb-2">
-          <input
-            class="form-check-input"
-            type="checkbox"
-            role="switch"
-            name="title_case"
-            id="optTitleCase"
-          />
-          <label class="form-check-label" for="optTitleCase">
-            Convert to Title Case
-          </label>
-        </div>
-
-        <div class="form-check form-switch mb-2">
-          <input
-            class="form-check-input"
-            type="checkbox"
-            role="switch"
-            name="sentence_case"
-            id="optSentenceCase"
-          />
-          <label class="form-check-label" for="optSentenceCase">
-            Convert to Sentence Case
-          </label>
-        </div>
-
-        <div class="form-check form-switch mb-2">
-          <input
-            class="form-check-input"
-            type="checkbox"
-            role="switch"
-            name="remove_numbers"
-            id="optRemoveNumbers"
-          />
-          <label class="form-check-label" for="optRemoveNumbers">
-            Remove Numbers
-          </label>
-        </div>
-
-        <div class="form-check form-switch mb-2">
-          <input
-            class="form-check-input"
-            type="checkbox"
-            role="switch"
-            name="reverse_text"
-            id="optReverseText"
-          />
-          <label class="form-check-label" for="optReverseText">
-            Reverse Entire Text
-          </label>
-        </div>
-
-        <div class="form-check form-switch mb-2">
-          <input
-            class="form-check-input"
-            type="checkbox"
-            role="switch"
-            name="reverse_lines"
-            id="optReverseLines"
-          />
-          <label class="form-check-label" for="optReverseLines">
-            Reverse Line Order
-          </label>
-        </div>
-
-        <div class="form-check form-switch mb-2">
-          <input
-            class="form-check-input"
-            type="checkbox"
-            role="switch"
-            name="remove_duplicates"
-            id="optRemoveDuplicates"
-          />
-          <label class="form-check-label" for="optRemoveDuplicates">
-            Remove Duplicate Lines
-          </label>
-        </div>
-
-        <!-- Sort Lines Toggle Switch -->
-        <div class="form-check form-switch mb-2">
-          <input
-            class="form-check-input"
-            type="checkbox"
-            role="switch"
-            name="sort_lines_switch"
-            id="optSortLines"
-          />
-          <label class="form-check-label" for="optSortLines">
-            Sort Lines
-          </label>
-        </div>
-
-        <!-- Sort Lines Dropdown (Hidden by default) -->
-        <div id="sortOptionsContainer" class="mb-3 ms-4 d-none">
-          <label for="sort_lines" class="form-label small text-muted mb-1"
-            >Sort by:</label
-          >
-          <select
-            class="form-select form-select-sm w-auto"
-            name="sort_lines"
-            id="sort_lines"
-          >
-            <option value="az" selected>Alphabetical (A-Z)</option>
-            <option value="za">Reverse Alphabetical (Z-A)</option>
-            <option value="length">Length (Shortest to Longest)</option>
-          </select>
-        </div>
-
-                <!-- Find & Replace -->
-        <div class="form-check form-switch mb-2">
-          <input class="form-check-input" type="checkbox" role="switch" name="find_replace_switch" id="optFindReplace" />
-          <label class="form-check-label" for="optFindReplace">Find & Replace</label>
-        </div>
-        <div id="findReplaceContainer" class="mb-3 ms-4 d-none">
-          <input type="text" class="form-control form-control-sm mb-2" name="find_text" placeholder="Find...">
-          <input type="text" class="form-control form-control-sm" name="replace_text" placeholder="Replace with...">
-        </div>
-
-        <!-- Extract Emails/URLs -->
-        <div class="form-check form-switch mb-2">
-          <input class="form-check-input" type="checkbox" role="switch" name="extract_emails" id="optExtractEmails" />
-          <label class="form-check-label" for="optExtractEmails">Extract Emails</label>
-        </div>
-        <div class="form-check form-switch mb-2">
-          <input class="form-check-input" type="checkbox" role="switch" name="extract_urls" id="optExtractUrls" />
-          <label class="form-check-label" for="optExtractUrls">Extract URLs</label>
-        </div>
-
-        <!-- Base64 & URL Encode/Decode -->
-        <div class="form-check form-switch mb-2">
-          <input class="form-check-input" type="checkbox" role="switch" name="base64_encode" id="optB64Encode" />
-          <label class="form-check-label" for="optB64Encode">Base64 Encode</label>
-        </div>
-        <div class="form-check form-switch mb-2">
-          <input class="form-check-input" type="checkbox" role="switch" name="base64_decode" id="optB64Decode" />
-          <label class="form-check-label" for="optB64Decode">Base64 Decode</label>
-        </div>
-        <div class="form-check form-switch mb-2">
-          <input class="form-check-input" type="checkbox" role="switch" name="url_encode" id="optUrlEncode" />
-          <label class="form-check-label" for="optUrlEncode">URL Encode</label>
-        </div>
-        <div class="form-check form-switch mb-2">
-          <input class="form-check-input" type="checkbox" role="switch" name="url_decode" id="optUrlDecode" />
-          <label class="form-check-label" for="optUrlDecode">URL Decode</label>
-        </div>
-        <div class="form-check form-switch mb-2">
-          <input class="form-check-input" type="checkbox" role="switch" name="json_format" id="optJsonFormat" />
-          <label class="form-check-label" for="optJsonFormat">Format JSON</label>
-        </div>
-
-
-
-
-
-        <div class="form-check form-switch mb-2">
-          <input
-            class="form-check-input"
-            type="checkbox"
-            role="switch"
-            name="rmnl"
-            id="optRmnl"
-          />
-          <label class="form-check-label" for="optRmnl">
-            Remove New Lines
-          </label>
-        </div>
-
-        <div class="form-check form-switch mb-2">
-          <input
-            class="form-check-input"
-            type="checkbox"
-            role="switch"
-            name="rmsp"
-            id="optRmsp"
-          />
-          <label class="form-check-label" for="optRmsp">
-            Remove Extra Spaces
-          </label>
-        </div>
-
-        <div class="form-check form-switch mb-2">
-          <input
-            class="form-check-input"
-            type="checkbox"
-            role="switch"
-            name="count"
-            id="optCount"
-          />
-          <label class="form-check-label" for="optCount">
-            Count Characters
-            <small class="text-muted">(overrides other operations)</small>
-          </label>
-        </div>
-      </fieldset>
-
-      <!-- Submit -->
-      <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-        <button type="reset" class="btn btn-outline-secondary">Clear</button>
-        <button type="submit" class="btn btn-primary px-4">Analyze Text</button>
-      </div>
-    </form>
+    </div>
   </div>
 </div>
-{% endblock %} {% block extra_js %}
+{% endblock %}
+
+{% block extra_js %}
 <script>
-  // Hide welcome alert after first view
-  (function () {
-    const alertEl = document.getElementById("welcomeAlert");
-    if (!alertEl) return;
-
-    if (sessionStorage.getItem("textutils_welcomed") === "1") {
-      alertEl.remove();
-    } else {
-      sessionStorage.setItem("textutils_welcomed", "1");
-    }
-  })();
-
-  // Demo Tests Dropdown
-  (function () {
-    const textarea = document.getElementById("textInput");
-    const clearBtn = document.getElementById("clearDemo");
-    const demoItems = document.querySelectorAll(".demo-item");
-
-    if (!textarea) return;
-
-    demoItems.forEach(function (item) {
-      item.addEventListener("click", function () {
-        textarea.value = item.dataset.text || "";
-        textarea.focus();
-        textarea.scrollTop = 0;
-      });
-    });
-
-    if (clearBtn) {
-      clearBtn.addEventListener("click", function () {
-        textarea.value = "";
-        textarea.focus();
-      });
-    }
-
     (function () {
-      const sortSwitch = document.getElementById("optSortLines");
-      const sortContainer = document.getElementById("sortOptionsContainer");
-
-      if (!sortSwitch || !sortContainer) return;
-
-      sortSwitch.addEventListener("change", function () {
-        if (this.checked) {
-          sortContainer.classList.remove("d-none");
-        } else {
-          sortContainer.classList.add("d-none");
+        const inputEl = document.getElementById('inputText');
+        const outputEl = document.getElementById('outputText');
+        const opChecks = document.querySelectorAll('.op-check');
+        
+        // Live Stats
+        function updateStats(el, charId, wordId, lineId) {
+            const val = el.value || '';
+            document.getElementById(charId).textContent = val.length;
+            document.getElementById(wordId).textContent = val.trim() === '' ? 0 : val.trim().split(/\s+/).length;
+            document.getElementById(lineId).textContent = val === '' ? 0 : val.split(/\r\n|\r|\n/).length;
         }
-      });
+
+        // The Core Transformation Logic
+        function processText() {
+            let text = inputEl.value;
+            
+            // 1. Find & Replace
+            const findT = document.getElementById('findText').value;
+            const replaceT = document.getElementById('replaceText').value;
+            if (findT) text = text.split(findT).join(replaceT);
+
+            // 2. Case Changes
+            if (document.getElementById('opUpper').checked) text = text.toUpperCase();
+            if (document.getElementById('opLower').checked) text = text.toLowerCase();
+            if (document.getElementById('opTitle').checked) text = text.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+
+            // 3. Remove Stuff
+            if (document.getElementById('opPunc').checked) text = text.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?"'”“‘’—]/g, "");
+            if (document.getElementById('opNum').checked) text = text.replace(/[0-9]/g, "");
+            if (document.getElementById('opSpaces').checked) text = text.replace(/\s+/g, ' ').trim();
+
+            // 4. Lines Manipulation
+            let lines = text.split('\n');
+            if (document.getElementById('opDup').checked) lines = [...new Set(lines)];
+            if (document.getElementById('opRevLines').checked) lines.reverse();
+            
+            const sortVal = document.getElementById('opSort').value;
+            if (sortVal === 'az') lines.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+            else if (sortVal === 'za') lines.sort((a, b) => b.toLowerCase().localeCompare(a.toLowerCase()));
+            else if (sortVal === 'length') lines.sort((a, b) => a.length - b.length);
+            
+            text = lines.join('\n');
+
+            // 5. Reverse Entire Text
+            if (document.getElementById('opRevText').checked) text = text.split('').reverse().join('');
+
+            // 6. Base64
+            if (document.getElementById('opB64').checked) {
+                try { text = btoa(text); } catch(e) { text = "Error: Cannot encode."; }
+            }
+
+            outputEl.value = text;
+            updateStats(inputEl, 'inChar', 'inWord', 'inLine');
+            updateStats(outputEl, 'outChar', 'outWord', 'outLine');
+        }
+
+        // Event Listeners
+        inputEl.addEventListener('input', processText);
+        opChecks.forEach(c => c.addEventListener('change', processText));
+        document.getElementById('opSort').addEventListener('change', processText);
+        document.getElementById('findText').addEventListener('input', processText);
+        document.getElementById('replaceText').addEventListener('input', processText);
+
+        // Copy
+        document.getElementById('copyBtn').addEventListener('click', () => {
+            navigator.clipboard.writeText(outputEl.value);
+            document.getElementById('copyBtn').textContent = 'Copied!';
+            setTimeout(() => document.getElementById('copyBtn').textContent = 'Copy', 1500);
+        });
+
+        // Download
+        document.getElementById('downloadBtn').addEventListener('click', () => {
+            const blob = new Blob([outputEl.value], { type: 'text/plain' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'textutils_output.txt';
+            a.click();
+        });
+
+        // Upload
+        document.getElementById('fileInput').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => { inputEl.value = e.target.result; processText(); };
+            reader.readAsText(file);
+        });
+
+        // Dark Mode
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-bs-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-bs-theme', newTheme);
+            document.getElementById('themeToggle').textContent = newTheme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
+        });
+
+        // Init
+        processText();
     })();
-      // Toggle Find & Replace Inputs
-  (function () {
-    const frSwitch = document.getElementById("optFindReplace");
-    const frContainer = document.getElementById("findReplaceContainer");
-    if (!frSwitch || !frContainer) return;
-    frSwitch.addEventListener("change", function () {
-      frContainer.classList.toggle("d-none", !this.checked);
-    });
-  })();
-  })();
 </script>
 {% endblock %}
